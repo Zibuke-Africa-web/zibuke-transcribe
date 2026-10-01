@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zibuke-transcribe",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-30",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "transcribe-db",
+    // Insert the ID returned by `wrangler d1 create transcribe-db`. No account IDs are committed.
+    "database_id": "187c1d4f-9360-4119-ba24-ad00bf0f3376",
+    "migrations_dir": "migrations"
+  }],
+  "r2_buckets": [{ "binding": "MEDIA_BUCKET", "bucket_name": "transcribe-recordings","preview_bucket_name": "transcribe-recordings" }],
+  "queues": {
+    "producers": [{ "binding": "JOB_QUEUE", "queue": "transcribe-processing" }],
+    "consumers": [{ "queue": "transcribe-processing", "max_batch_size": 1, "max_batch_timeout": 5, "max_retries": 3, "max_concurrency": 1 }]
+  },
+  "ai": { "binding": "AI", "remote": false },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    "PUBLIC_ORIGIN": "https://transcribe.nyekamawabo.workers.dev",
+    "GOOGLE_DRIVE_ENABLED": "false",
+    "MAX_GOOGLE_DRIVE_IMPORT_BYTES": "26214400",
+    "MAX_UPLOAD_BYTES": "26214400",
+    "MAX_TRANSCRIPTION_BYTES": "26214400"
+  },
+  "observability": { "enabled": false },
+  "limits": { "cpu_ms": 30000 }
+}
